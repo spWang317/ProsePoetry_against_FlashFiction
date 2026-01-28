@@ -70,5 +70,5 @@ The initial embedding extraction was performed on a high-performance computing (
 * `Flashfiction_0024.csv` & `Prosepoem_0024.csv`: **Not Publicly Available** due to copyright protection of the literary works.
 
 ### Reproducibility Package
-* `FlashFiction_embs.pkl` & `ProsePoem_embs.pkl`: High-dimensional semantic vectors that serve as the numerical foundation for all findings.
+* `FlashFiction_embs.pkl` & `ProsePoem_embs.pkl`: **Not provided due to file size limitations on GitHub.** High-dimensional semantic vectors that serve as the numerical foundation for all findings.
 * `Flashfiction_book_list.csv` & `Prosepoem_book_list.csv`: Comprehensive metadata including book titles, authors, publishers, publication years, and ISBNs to allow for independent corpus verification.
