@@ -72,3 +72,14 @@ The initial embedding extraction was performed on a high-performance computing (
 ### Reproducibility Package
 * `FlashFiction_embs.pkl` & `ProsePoem_embs.pkl`: **Not provided due to file size limitations on GitHub.** High-dimensional semantic vectors that serve as the numerical foundation for all findings.
 * `Flashfiction_book_list.csv` & `Prosepoem_book_list.csv`: Comprehensive metadata including book titles, authors, publishers, publication years, and ISBNs to allow for independent corpus verification.
+
+
+## 📄 Citation & Preprint
+
+If you find this framework or the provided semantic dynamics analysis useful for your research, please cite our preprint:
+
+**"From Kinetic to Resonant Regimes: Geometric Differentiation of Prose Poetry against Flash Fiction"**
+
+* **Preprint Server**: Research Square
+* **DOI**: [10.21203/rs.3.rs-8722451/v1](https://doi.org/10.21203/rs.3.rs-8722451/v1)
+* **URL**: [https://www.researchsquare.com/article/rs-8722451/v1](https://www.researchsquare.com/article/rs-8722451/v1)
