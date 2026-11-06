@@ -26,12 +26,12 @@ authors outside Korea in the corpus: 248 (8.9%), nationality not recorded: 7
 author nationality in the sample: {'한국': 334, '일본': 41, '미국': 3, '캐나다': 1}
 authors outside Korea in the sample: 45 (11.9%)
 
-== ProsePoem: corpus 5133, at least five sentences under both splits 3513, analysis sample 379
+== ProsePoem: corpus 5131, at least five sentences under both splits 3513, analysis sample 379
 sentences (source-text split) median [IQR]: >= 5 sentences 12.0 [8.0, 20.0] | sample 22.0 [14.0, 31.5]
 words per sentence median [IQR]:            >= 5 sentences 9.3 [6.6, 13.8] | sample 9.7 [7.5, 12.2]
 trajectory sentences median [IQR], sample: 22.0 [14.0, 32.0] | trajectory words per sentence: 9.6 [7.4, 12.2]
 words median [IQR], sample: source-text split 217.0 [155.5, 279.0] | trajectory 217.0 [155.5, 279.0]
-books: corpus 726 | sample 197 ; authors: corpus 411 | sample 144 ; publication years: corpus 2000-2024
+books: corpus 725 | sample 197 ; authors: corpus 411 | sample 144 ; publication years: corpus 2000-2024
 largest book in the sample: 나는 어둡고 적막한 집에 홀로 있었다 (17 texts, 4.5%)
          >= 5 sentences  sample  >= 5 sentences %  sample %
 period                                                     

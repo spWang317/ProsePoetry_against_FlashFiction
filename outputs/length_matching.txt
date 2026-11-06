@@ -1,4 +1,4 @@
 FlashFiction: corpus 2795 | at least five sentences under both splits 2724
-ProsePoem: corpus 5133 | at least five sentences under both splits 3513
+ProsePoem: corpus 5131 | at least five sentences under both splits 3513
 cells shared by both genres: 192 (FF 814, PP 2753) | with at least two texts per genre: 111 (FF 525, PP 2090)
 matched: FF 379, PP 379

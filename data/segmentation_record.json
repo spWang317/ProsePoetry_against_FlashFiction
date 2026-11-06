@@ -3,7 +3,7 @@
  "kss": "6.0.6",
  "kss_backend": "konlpy",
  "texts": {
-  "ProsePoem": 5133,
+  "ProsePoem": 5131,
   "FlashFiction": 2795
  },
  "texts_split_with_fallback": {

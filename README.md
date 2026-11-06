@@ -80,7 +80,7 @@ The scripts overwrite the files in `outputs/`. The bootstrap intervals in `03_ta
 
 ### `data/corpus_table.csv`
 
-One row per text of the corpus (2,795 flash-fiction texts, 5,133 prose poems). `row` identifies the text within its genre. The sentence counts are written by `requires_source_texts/segment_corpus.py`; the bibliographic columns are the record of the source files.
+One row per text of the corpus (2,795 flash-fiction texts, 5,131 prose poems). `row` identifies the text within its genre. The sentence counts are written by `requires_source_texts/segment_corpus.py`; the bibliographic columns are the record of the source files.
 
 | Column | Meaning |
 |---|---|
