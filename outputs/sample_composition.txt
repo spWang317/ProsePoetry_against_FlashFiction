@@ -1,0 +1,48 @@
+analysis sample: {'FlashFiction': 379, 'ProsePoem': 379}
+
+== FlashFiction: corpus 2795, at least five sentences under both splits 2724, analysis sample 379
+sentences (source-text split) median [IQR]: >= 5 sentences 61.0 [38.0, 93.0] | sample 23.0 [14.0, 31.5]
+words per sentence median [IQR]:            >= 5 sentences 10.6 [8.6, 13.0] | sample 9.7 [7.9, 12.2]
+trajectory sentences median [IQR], sample: 26.0 [15.0, 38.0] | trajectory words per sentence: 8.3 [6.5, 10.5]
+words median [IQR], sample: source-text split 217.0 [159.0, 283.0] | trajectory 217.0 [159.0, 283.0]
+books: corpus 126 | sample 48 ; authors: corpus 330 | sample 63 ; publication years: corpus 2006-2024
+largest book in the sample: LOSER 루저 (56 texts, 14.8%)
+         >= 5 sentences  sample  >= 5 sentences %  sample %
+period                                                     
+2000-04               0       0               0.0       0.0
+2005-09             146      61               5.4      16.1
+2010-14             372      72              13.7      19.0
+2015-19             779      79              28.6      20.8
+2020-24            1427     167              52.4      44.1
+           >= 5 sentences  sample  sample %
+publisher                                  
+나무와숲                  267      58      15.3
+메이킹북스                  86      56      14.8
+우리글                   225      51      13.5
+문학과지성사                122      21       5.5
+문학사상                   36      20       5.3
+이든하우스                  44      18       4.7
+authors outside Korea in the corpus: 248 (8.9%), nationality not recorded: 7
+author nationality in the sample: {'한국': 334, '일본': 41, '미국': 3, '캐나다': 1}
+authors outside Korea in the sample: 45 (11.9%)
+
+== ProsePoem: corpus 5133, at least five sentences under both splits 3513, analysis sample 379
+sentences (source-text split) median [IQR]: >= 5 sentences 12.0 [8.0, 20.0] | sample 22.0 [14.0, 31.5]
+words per sentence median [IQR]:            >= 5 sentences 9.3 [6.6, 13.8] | sample 9.7 [7.5, 12.2]
+trajectory sentences median [IQR], sample: 22.0 [14.0, 32.0] | trajectory words per sentence: 9.6 [7.4, 12.2]
+words median [IQR], sample: source-text split 217.0 [155.5, 279.0] | trajectory 217.0 [155.5, 279.0]
+books: corpus 736 | sample 197 ; authors: corpus 415 | sample 146 ; publication years: corpus 2000-2024
+largest book in the sample: 나는 어둡고 적막한 집에 홀로 있었다 (17 texts, 4.5%)
+         >= 5 sentences  sample  >= 5 sentences %  sample %
+period                                                     
+2000-04             285      28               8.1       7.4
+2005-09             405      39              11.5      10.3
+2010-14             885      70              25.2      18.5
+2015-19             838      88              23.9      23.2
+2020-24            1100     154              31.3      40.6
+           >= 5 sentences  sample  sample %
+publisher                                  
+문학과지성사               1174     137      36.1
+문학동네                  832     102      26.9
+민음사                   815      76      20.1
+창비                    692      64      16.9

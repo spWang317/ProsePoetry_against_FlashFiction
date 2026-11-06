@@ -1,0 +1,63 @@
+== length_parity
+                                                               quantity  n_FF  n_PP  FF_median  PP_median  FF_mean  PP_mean  MWU_p
+                                              sentences, matching stage   379   379    23.0000    22.0000  23.6596  23.6755 0.9832
+                                     words per sentence, matching stage   379   379     9.6765     9.6957  10.2990  10.2048 0.6268
+                                                  words, matching stage   379   379   217.0000   217.0000 222.5937 219.3377 0.6903
+                                         sentences, embedded trajectory   379   379    26.0000    22.0000  28.1187  23.9393 0.0003
+                                words per sentence, embedded trajectory   379   379     8.3243     9.6061   8.9041  10.1512 0.0000
+                                             words, embedded trajectory   379   379   217.0000   217.0000 222.5567 219.3351 0.6940
+documents whose trajectory length differs from the matching-stage count   232    28        NaN        NaN      NaN      NaN    NaN
+
+== spectral_window
+       genre  documents  step_series_longer_than_64  zero_padded
+FlashFiction        379                           8          371
+   ProsePoem        379                           6          373
+
+== effect_sizes
+              encoder           metric  FF_median  PP_median  cliffs_delta   MWU_U  MWU_p  OLS_beta  OLS_CI_low  OLS_CI_high  OLS_p  MWU_p_FDR  delta_CI_low  delta_CI_high  prob_superiority_FF
+ko-sroberta-multitask            delta     1.2370     1.1931        0.1834 84990.0 0.0000    0.0498      0.0256       0.0739 0.0001     0.0000        0.1024         0.2650               0.5917
+ko-sroberta-multitask    surprisal_std     0.1117     0.1066        0.1229 80648.0 0.0034    0.0049      0.0012       0.0086 0.0087     0.0043        0.0416         0.2026               0.5615
+ko-sroberta-multitask global_resonance     0.2641     0.2832       -0.1876 58348.0 0.0000   -0.0175     -0.0264      -0.0085 0.0001     0.0000       -0.2677        -0.1051               0.4062
+ko-sroberta-multitask        curvature     2.0661     2.0599        0.1271 80951.0 0.0025    0.0090      0.0020       0.0159 0.0114     0.0041        0.0455         0.2089               0.5636
+ko-sroberta-multitask    spec_centroid     0.2396     0.2428       -0.0663 67056.0 0.1140   -0.0024     -0.0087       0.0040 0.4667     0.1140       -0.1489         0.0163               0.4668
+               bge-m3            delta     1.0367     1.0130        0.1821 84900.0 0.0000    0.0360      0.0173       0.0547 0.0002     0.0000        0.0993         0.2645               0.5911
+               bge-m3    surprisal_std     0.0598     0.0586        0.0716 76964.0 0.0880    0.0012     -0.0010       0.0035 0.2796     0.1099       -0.0084         0.1550               0.5358
+               bge-m3 global_resonance     0.4696     0.4812       -0.1845 58568.0 0.0000   -0.0124     -0.0184      -0.0064 0.0001     0.0000       -0.2653        -0.1029               0.4077
+               bge-m3        curvature     2.0735     2.0619        0.1836 85006.0 0.0000    0.0126      0.0066       0.0185 0.0000     0.0000        0.1031         0.2642               0.5918
+               bge-m3    spec_centroid     0.2392     0.2451       -0.0514 68127.0 0.2205   -0.0020     -0.0085       0.0045 0.5473     0.2205       -0.1359         0.0314               0.4743
+multilingual-e5-large            delta     0.5804     0.5666        0.1471 82382.0 0.0005    0.0165      0.0056       0.0274 0.0031     0.0008        0.0657         0.2271               0.5735
+multilingual-e5-large    surprisal_std     0.0172     0.0165        0.1010 79075.0 0.0161    0.0005     -0.0002       0.0011 0.1546     0.0161        0.0215         0.1833               0.5505
+multilingual-e5-large global_resonance     0.8337     0.8372       -0.1250 62841.0 0.0029   -0.0023     -0.0045      -0.0001 0.0404     0.0036       -0.2074        -0.0440               0.4375
+multilingual-e5-large        curvature     2.0715     2.0654        0.1525 82771.0 0.0003    0.0102      0.0040       0.0163 0.0012     0.0008        0.0709         0.2331               0.5762
+multilingual-e5-large    spec_centroid     0.2276     0.2395       -0.1494 61088.0 0.0004   -0.0093     -0.0158      -0.0029 0.0044     0.0008       -0.2312        -0.0687               0.4253
+
+== permanova
+              encoder  pseudo_F      p  SS_between  SS_within     R2  Levene_stat  Levene_p
+ko-sroberta-multitask   12.7189 0.0002     62.7075  3727.2925 0.0165       0.0458    0.8306
+               bge-m3   12.0155 0.0002     59.2940  3730.7060 0.0156       0.2519    0.6159
+multilingual-e5-large    9.7852 0.0002     48.4285  3741.5715 0.0128       0.2049    0.6509
+
+== metric_relations
+              encoder  rho_delta_resonance  max_abs_rho                 max_pair
+ko-sroberta-multitask               -0.301        0.301 delta / global_resonance
+               bge-m3               -0.353        0.353 delta / global_resonance
+multilingual-e5-large               -0.361        0.361 delta / global_resonance
+
+== classification
+              encoder                                          features          classifier  accuracy  accuracy_sd    F1  F1_sd  AUROC  AUROC_sd
+ko-sroberta-multitask                                    majority class                   -     0.499        0.003 0.066  0.198  0.500     0.000
+ko-sroberta-multitask length (trajectory sentences, words per sentence)       random forest     0.504        0.044 0.499  0.059  0.524     0.025
+ko-sroberta-multitask length (trajectory sentences, words per sentence) logistic regression     0.584        0.055 0.605  0.062  0.601     0.051
+ko-sroberta-multitask                                     five measures       random forest     0.570        0.081 0.566  0.083  0.585     0.090
+ko-sroberta-multitask                                     five measures logistic regression     0.599        0.054 0.611  0.052  0.635     0.076
+               bge-m3                                    majority class                   -     0.499        0.003 0.066  0.198  0.500     0.000
+               bge-m3 length (trajectory sentences, words per sentence)       random forest     0.504        0.044 0.499  0.059  0.524     0.025
+               bge-m3 length (trajectory sentences, words per sentence) logistic regression     0.584        0.055 0.605  0.062  0.601     0.051
+               bge-m3                                     five measures       random forest     0.595        0.038 0.587  0.040  0.632     0.050
+               bge-m3                                     five measures logistic regression     0.619        0.055 0.638  0.050  0.649     0.072
+multilingual-e5-large                                    majority class                   -     0.499        0.003 0.066  0.198  0.500     0.000
+multilingual-e5-large length (trajectory sentences, words per sentence)       random forest     0.504        0.044 0.499  0.059  0.524     0.025
+multilingual-e5-large length (trajectory sentences, words per sentence) logistic regression     0.584        0.055 0.605  0.062  0.601     0.051
+multilingual-e5-large                                     five measures       random forest     0.615        0.040 0.603  0.050  0.648     0.041
+multilingual-e5-large                                     five measures logistic regression     0.603        0.060 0.613  0.061  0.637     0.065
+                    -                                    words (TF-IDF) logistic regression     0.835        0.047 0.833  0.050  0.919     0.035

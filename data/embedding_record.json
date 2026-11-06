@@ -1,0 +1,44 @@
+{
+ "python": "3.10.19",
+ "torch": "2.9.1+cu128",
+ "scikit-learn": "1.7.2",
+ "sentence_transformers": "5.2.0",
+ "numpy": "2.1.2",
+ "encoders": [
+  {
+   "tag": "ko-sroberta-multitask",
+   "model": "jhgan/ko-sroberta-multitask",
+   "revision": "8fca7c9c98c26599be0e14b9916b11a756a26f19",
+   "sentence_prefix": ""
+  },
+  {
+   "tag": "bge-m3",
+   "model": "BAAI/bge-m3",
+   "revision": "5617a9f61b028005a4858fdac845db406aefb181",
+   "sentence_prefix": ""
+  },
+  {
+   "tag": "me5-large",
+   "model": "intfloat/multilingual-e5-large",
+   "revision": "3d7cfbdacd47fdda877c5cd8a79fbcc4f2a574f3",
+   "sentence_prefix": "query: "
+  }
+ ],
+ "token_limits": {
+  "ko-sroberta-multitask": {
+   "max_seq_length": 128,
+   "n_sentences": 19730,
+   "n_over_limit": 17
+  },
+  "bge-m3": {
+   "max_seq_length": 512,
+   "n_sentences": 19730,
+   "n_over_limit": 0
+  },
+  "me5-large": {
+   "max_seq_length": 512,
+   "n_sentences": 19730,
+   "n_over_limit": 0
+  }
+ }
+}

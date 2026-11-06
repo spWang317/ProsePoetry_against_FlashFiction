@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+"""The five measures of a trajectory and the per-encoder statistics.
+
+Run from the repository root (one encoder per call):
+    python code/measures_and_statistics.py --ff_pkl <flash fiction> --pp_pkl <prose poems> --out_dir <folder>
+
+Reads two embedding files (data/embeddings/). Writes to --out_dir the measures of every text, the per-measure
+tests (Mann-Whitney U with BH-FDR, Cliff's delta, length-controlled OLS with HC3 errors), the correlations and
+variance inflation factors of the measures, the multivariate comparison (PERMANOVA, dispersion) and the ablation.
+"""
 import os
 import pickle
 import numpy as np
@@ -19,7 +28,7 @@ from sklearn.metrics import f1_score, roc_auc_score
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 # =========================================================
-# 1. Advanced Utility Functions (Statistical Rigor Tools)
+# 1. Utility functions
 # =========================================================
 def _compute_vif_table(X_df):
     """Centered VIF calculation with constant for collinearity diagnostics"""
@@ -82,36 +91,41 @@ def dispersion_check_full(X, groups, out_csv=None):
     return {"levene_stat": lev_stat, "levene_p": lev_p}, out_df
 
 # =========================================================
-# 2. Geometric Feature Extraction (5D Metrics)
+# 2. The five measures
 # =========================================================
+# A step between two identical consecutive sentences has no direction. Such steps differ from
+# zero only by floating-point noise (below 2e-6 for the encoders used; every other step exceeds 0.06)
+# and are left out of the curvature.
+ZERO_STEP = 1e-4
+
 def compute_5d_metrics(embs):
     T = embs.shape[0]
     if T < 5: return None
     
-    # [1] Displacement (Delta)
+    # [1] Displacement
     delta = np.linalg.norm(embs[-1] - embs[0])
     
-    # [2] Surprisal Volatility (Shock)
+    # [2] Transition volatility
     cos_sims = np.clip([np.dot(embs[i], embs[i+1]) for i in range(T-1)], -1.0, 1.0)
     surprisals = -np.log((cos_sims + 1.0) / 2.0 + 1e-12)
     surprisal_std = np.std(surprisals)
     
-    # [3] Global Resonance (Density)
+    # [3] Global resonance
     ssm = 1.0 - squareform(pdist(embs, 'cosine'))
     np.fill_diagonal(ssm, 0)
     global_resonance = np.mean(ssm[np.triu_indices(T, k=1)])
     
-    # [4] Curvature (Shape)
+    # [4] Curvature
     steps = embs[1:] - embs[:-1]
     step_norms = np.linalg.norm(steps, axis=1)
     angles = []
     for i in range(len(steps) - 1):
-        norm_p = step_norms[i] * step_norms[i+1]
-        if norm_p > 1e-12:
+        if step_norms[i] > ZERO_STEP and step_norms[i+1] > ZERO_STEP:
+            norm_p = step_norms[i] * step_norms[i+1]
             angles.append(np.arccos(np.clip(np.dot(steps[i], steps[i+1]) / norm_p, -1.0, 1.0)))
     curvature = np.mean(angles) if len(angles) >= 2 else np.nan
     
-    # [5] Spectral Centroid (Rhythm)
+    # [5] Spectral centroid
     x = step_norms - np.mean(step_norms)
     f, psd = periodogram(x, fs=1.0, nfft=64)
     pos_mask = f > 0
@@ -125,17 +139,20 @@ def compute_5d_metrics(embs):
 # =========================================================
 # 3. Main Analysis Execution
 # =========================================================
-def run_ultimate_5d_analysis():
+DEFAULT_FF_PKL = "data/embeddings/FlashFiction_embs_ko-sroberta-multitask.pkl"
+DEFAULT_PP_PKL = "data/embeddings/ProsePoem_embs_ko-sroberta-multitask.pkl"
+DEFAULT_OUT_DIR = "outputs/statistics/ko-sroberta-multitask"
+
+def run_analysis(ff_pkl=DEFAULT_FF_PKL, pp_pkl=DEFAULT_PP_PKL, out_dir=DEFAULT_OUT_DIR):
+    """ff_pkl / pp_pkl: embedding files; out_dir: where tables are written."""
     # Set seed for exact reproducibility
     np.random.seed(42)
     
-    # Path Configuration (Consistent with your reference script)
     base_path = "."  
-    out_dir = "./Final_Research_Output_5D_Restored"
     os.makedirs(out_dir, exist_ok=True)
     
-    # Load from PKL (Now text-free)
-    targets = [("FlashFiction_embs.pkl", "FlashFiction"), ("ProsePoem_embs.pkl", "ProsePoem")]
+    # Load the embedding files
+    targets = [(ff_pkl, "FlashFiction"), (pp_pkl, "ProsePoem")]
     
     all_data = []
     metrics_list = ["delta", "surprisal_std", "global_resonance", "curvature", "spec_centroid"]
@@ -150,6 +167,8 @@ def run_ultimate_5d_analysis():
         with open(pkl_path, 'rb') as f:
             data = pickle.load(f)
         
+        # Position of each document in the analysis sample.
+        doc_ids = data.get("pkl_index", list(range(len(data['embeddings']))))
         for i in tqdm(range(len(data['embeddings'])), desc=f"Analyzing {genre}"):
             embs = data['embeddings'][i]
             if embs is None or len(embs) < 5: 
@@ -158,12 +177,15 @@ def run_ultimate_5d_analysis():
             # Compute geometric metrics from vectors
             m = compute_5d_metrics(embs)
             if m:
-                # Synchronize metadata (n_sent is crucial for OLS control)
+                # Length covariate for OLS: number of sentences in the embedded trajectory.
+                # n_sent_matching keeps the sentence count recorded at the matching stage.
                 m.update({
                     "genre": genre, 
                     "is_flash": 1 if genre == "FlashFiction" else 0,
-                    "n_sent": float(data['n_sentences'][i]), 
-                    "log_n_sent": float(np.log1p(data['n_sentences'][i]))
+                    "n_sent": float(embs.shape[0]), 
+                    "log_n_sent": float(np.log1p(embs.shape[0])),
+                    "n_sent_matching": float(data['n_sentences'][i]),
+                    "pkl_index": int(doc_ids[i])
                 })
                 all_data.append(m)
 
@@ -171,14 +193,14 @@ def run_ultimate_5d_analysis():
     df = pd.DataFrame(all_data).dropna(subset=metrics_list)
     df.to_csv(os.path.join(out_dir, "Pure_Metrics_Data_Final_5D.csv"), index=False)
 
-    # Stability logging (spec_centroid stability check)
+    # Log: share of texts with zero spectral power
     sc_zero_ratio = (df['spec_centroid'] == 0).mean()
     with open(os.path.join(out_dir, "Stability_Log.txt"), "w") as f:
         f.write(f"Total Samples: {len(df)}\n")
         f.write(f"SpecCentroid Zero Ratio: {sc_zero_ratio:.4f}\n")
         f.write(f"PSD Total Mean: {df['psd_total'].mean():.6f}\n")
 
-    print("\n[Step 2] Statistical Validation & OLS Summary...")
+    print("\n[Step 2] Per-measure tests and regression...")
     summary_rows = []
     p_vals = []
     for met in metrics_list:
@@ -214,8 +236,8 @@ def run_ultimate_5d_analysis():
     # Save Final Summary Table
     pd.DataFrame(summary_rows).to_csv(os.path.join(out_dir, "Final_Summary_Table_5D.csv"), index=False)
 
-    print("\n[Step 3] Statistical Defense: VIF, PERMANOVA, and Dispersion...")
-    # Orthogonality checks
+    print("\n[Step 3] VIF, PERMANOVA, and dispersion...")
+    # Relations between the measures
     _compute_vif_table(df[metrics_list]).to_csv(os.path.join(out_dir, "Metric_VIF_5D.csv"), index=False)
     df[metrics_list].corr(method='spearman').to_csv(os.path.join(out_dir, "Metric_Orthogonality_Spearman.csv"))
     
@@ -228,7 +250,7 @@ def run_ultimate_5d_analysis():
         f.write(f"pseudo-F: {f_stat:.6f}\np-value: {p_perm:.6f}\nSS_between: {ssa:.6f}\nSS_within: {ssw:.6f}\n\n")
         f.write(f"Levene_stat: {disp_res['levene_stat']:.6f}\nLevene_p: {disp_res['levene_p']:.6f}")
 
-    print("\n[Step 4] Robust Ablation Study (RF Classifier)...")
+    print("\n[Step 4] Ablation (random forest)...")
     skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
     pipe = Pipeline([("scaler", StandardScaler()), ("clf", RandomForestClassifier(n_estimators=300, random_state=42, class_weight="balanced"))])
     X_raw, y = df[metrics_list].values, df["is_flash"].values
@@ -262,7 +284,16 @@ def run_ultimate_5d_analysis():
         })
     
     pd.DataFrame(ab_rows).to_csv(os.path.join(out_dir, "Ablation_Study_Results_5D.csv"), index=False)
-    print(f"\n✅ All analysis stages complete. Hardened results saved in {out_dir}")
+    print(f"\nAll analysis stages complete. Results saved in {out_dir}")
 
 if __name__ == "__main__":
-    run_ultimate_5d_analysis()
+    import argparse
+    ap = argparse.ArgumentParser(description="5D metrics and statistics from sentence-embedding files.")
+    ap.add_argument("--ff_pkl", default=DEFAULT_FF_PKL)
+    ap.add_argument("--pp_pkl", default=DEFAULT_PP_PKL)
+    ap.add_argument("--out_dir", default=DEFAULT_OUT_DIR)
+    args = ap.parse_args()
+    if (args.ff_pkl != DEFAULT_FF_PKL or args.pp_pkl != DEFAULT_PP_PKL) and \
+            os.path.abspath(args.out_dir) == os.path.abspath(DEFAULT_OUT_DIR):
+        ap.error("--out_dir must differ from the default when other embedding files are analysed")
+    run_analysis(args.ff_pkl, args.pp_pkl, args.out_dir)

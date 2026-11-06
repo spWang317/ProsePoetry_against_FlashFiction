@@ -1,0 +1,7 @@
+pseudo-F: 9.785184
+p-value: 0.000200
+SS_between: 48.428528
+SS_within: 3741.571472
+
+Levene_stat: 0.204915
+Levene_p: 0.650912

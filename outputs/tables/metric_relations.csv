@@ -1,0 +1,4 @@
+encoder,rho_delta_resonance,max_abs_rho,max_pair
+ko-sroberta-multitask,-0.30104503583130454,0.30104503583130454,delta / global_resonance
+bge-m3,-0.3532061286610367,0.3532061286610367,delta / global_resonance
+multilingual-e5-large,-0.3609609497617245,0.3609609497617245,delta / global_resonance

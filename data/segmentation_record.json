@@ -1,0 +1,19 @@
+{
+ "python": "3.10.19",
+ "kss": "6.0.6",
+ "kss_backend": "konlpy",
+ "texts": {
+  "ProsePoem": 5133,
+  "FlashFiction": 2795
+ },
+ "texts_split_with_fallback": {
+  "ProsePoem": {
+   "source_split": 0,
+   "trajectory_split": 0
+  },
+  "FlashFiction": {
+   "source_split": 0,
+   "trajectory_split": 0
+  }
+ }
+}
