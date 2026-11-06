@@ -31,7 +31,7 @@ sentences (source-text split) median [IQR]: >= 5 sentences 12.0 [8.0, 20.0] | sa
 words per sentence median [IQR]:            >= 5 sentences 9.3 [6.6, 13.8] | sample 9.7 [7.5, 12.2]
 trajectory sentences median [IQR], sample: 22.0 [14.0, 32.0] | trajectory words per sentence: 9.6 [7.4, 12.2]
 words median [IQR], sample: source-text split 217.0 [155.5, 279.0] | trajectory 217.0 [155.5, 279.0]
-books: corpus 736 | sample 197 ; authors: corpus 415 | sample 146 ; publication years: corpus 2000-2024
+books: corpus 726 | sample 197 ; authors: corpus 415 | sample 146 ; publication years: corpus 2000-2024
 largest book in the sample: 나는 어둡고 적막한 집에 홀로 있었다 (17 texts, 4.5%)
          >= 5 sentences  sample  >= 5 sentences %  sample %
 period                                                     
