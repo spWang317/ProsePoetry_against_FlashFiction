@@ -1,0 +1,25 @@
+genre coefficient (flash fiction = 1), HC3; A = + log(1+T) [manuscript], B = + log(1+T) + trajectory words per sentence
+model                    measure     beta_A     p_A    beta_B     p_B  wps coef   p_wps
+ko-sroberta-multitask    δ          +0.0498   0.000   +0.0468   0.000   -0.0036   0.066
+ko-sroberta-multitask    σ_S        +0.0049   0.009   +0.0039   0.033   -0.0012   0.003
+ko-sroberta-multitask    R          -0.0175   0.000   -0.0145   0.002   +0.0035   0.000
+ko-sroberta-multitask    κ          +0.0090   0.011   +0.0094   0.006   +0.0006   0.500
+ko-sroberta-multitask    Ω          -0.0024   0.467   -0.0042   0.197   -0.0022   0.000
+bge-m3                   δ          +0.0360   0.000   +0.0366   0.000   +0.0008   0.613
+bge-m3                   σ_S        +0.0012   0.280   +0.0004   0.707   -0.0010   0.000
+bge-m3                   R          -0.0124   0.000   -0.0143   0.000   -0.0023   0.001
+bge-m3                   κ          +0.0126   0.000   +0.0132   0.000   +0.0008   0.266
+bge-m3                   Ω          -0.0020   0.547   -0.0029   0.378   -0.0011   0.084
+multilingual-e5-large    δ          +0.0165   0.003   +0.0165   0.003   +0.0001   0.953
+multilingual-e5-large    σ_S        +0.0005   0.155   +0.0003   0.282   -0.0001   0.030
+multilingual-e5-large    R          -0.0023   0.040   -0.0027   0.019   -0.0004   0.047
+multilingual-e5-large    κ          +0.0102   0.001   +0.0106   0.001   +0.0005   0.500
+multilingual-e5-large    Ω          -0.0093   0.004   -0.0107   0.001   -0.0016   0.017
+
+Spearman correlation of wps_traj with each measure (primary model), and genre medians of wps_traj:
+  δ      rho = -0.147
+  σ_S    rho = -0.269
+  R      rho = +0.373
+  κ      rho = -0.049
+  Ω      rho = +0.044
+  wps_traj median FF / PP: 8.324324324324325 / 9.606060606060606

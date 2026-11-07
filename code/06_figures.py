@@ -8,7 +8,7 @@ Inputs: outputs/tables/effect_sizes.csv, outputs/statistics/<encoder>/Pure_Metri
         data/corpus_table.csv (sentence counts of every text), data/sample_rows.csv.
 Outputs (PDF and PNG): Figure1 (schematic of the five measures), Figure2 (length distributions),
         Figure3 (distributions of the measures), Figure4 (effect sizes under three encoders),
-        FigureS1 (distance to the genre centroid), FigureS2 (pairwise relations between the measures).
+        FigureS1 (distance to the genre centre), FigureS2 (pairwise relations between the measures).
 """
 import os, argparse
 import numpy as np, pandas as pd
@@ -16,6 +16,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Arc
+from matplotlib.legend_handler import HandlerTuple
 from scipy.stats import gaussian_kde
 from scipy.signal import periodogram
 from sklearn.preprocessing import StandardScaler
@@ -68,7 +69,7 @@ def path_plot(ax, pts, dashed_ends=False, all_pairs=False):
 
 
 def figure1(out_dir):
-    fig, axes = plt.subplots(2, 5, figsize=(7.4, 3.5), gridspec_kw={"wspace": 0.3, "hspace": 0.34})
+    fig, axes = plt.subplots(2, 5, figsize=(6.0, 2.75), gridspec_kw={"wspace": 0.55, "hspace": 0.6})
     titles = ["Displacement\n" + r"$\delta$", "Transition volatility\n" + r"$\sigma_S$", "Global resonance\n" + r"$\mathcal{R}$",
               "Curvature\n" + r"$\kappa$", "Spectral centroid\n" + r"$\Omega$"]
     # a displacement
@@ -77,8 +78,8 @@ def figure1(out_dir):
     # b transition volatility: sizes of the change between neighbouring sentences
     for ax, s in [(axes[0, 1], [0.5, 0.55, 0.48, 0.52, 0.5, 0.54, 0.47]), (axes[1, 1], [0.15, 0.2, 0.95, 0.18, 0.7, 0.12, 0.85])]:
         ax.bar(range(1, 8), s, width=0.62, color=MUTED)
-        ax.set_ylim(0, 1.05); ax.set_xticks([1, 4, 7]); ax.set_yticks([])
-        ax.set_xlabel("sentence step $t$", labelpad=1); ax.set_ylabel("$s_t$", labelpad=1)
+        ax.set_ylim(0, 1.05); ax.set_xticks([1, 4, 7]); ax.set_yticks([]); ax.set_box_aspect(1)
+        ax.set_xlabel("move $t$", labelpad=1); ax.set_ylabel("$s_t$", labelpad=1)
     # c global resonance
     rng = np.random.default_rng(3)
     path_plot(axes[0, 2], np.clip(rng.uniform(0.02, 0.98, (7, 2)), 0, 1), all_pairs=True)
@@ -95,26 +96,29 @@ def figure1(out_dir):
             lo, hi = hi, lo + 360
         ax.add_patch(Arc(p2, 0.34, 0.34, theta1=lo, theta2=hi, color=FF, lw=1.1))
         mid = np.radians((lo + hi) / 2)
-        ax.text(p2[0] + 0.27 * np.cos(mid), p2[1] + 0.27 * np.sin(mid), r"$\theta_t$", fontsize=7, ha="center", va="center", color=INK)
+        rad = 0.27
+        if hi - lo < 60:                          # a narrow angle carries its label beside the arc, below the dashed line
+            mid, rad = np.radians(lo - 30), 0.3
+        ax.text(p2[0] + rad * np.cos(mid), p2[1] + rad * np.sin(mid), r"$\theta_t$", fontsize=7, ha="center", va="center", color=INK)
     # e spectral centroid: step sizes and their periodogram
     t = np.arange(24)
     for ax, a in [(axes[0, 4], 0.5 + 0.35 * np.sin(2 * np.pi * t / 12)), (axes[1, 4], 0.5 + 0.35 * np.where(t % 2 == 0, 1, -1))]:
         ax.plot(t + 1, a, color=INK, lw=1.0, marker="o", ms=2.2)
-        ax.set_ylim(0, 2.1); ax.set_xticks([1, 12, 24]); ax.set_yticks([])
-        ax.set_xlabel("sentence step $t$", labelpad=1); ax.set_ylabel("$a_t$", labelpad=1)
+        ax.set_ylim(0, 2.7); ax.set_xticks([1, 12, 24]); ax.set_yticks([]); ax.set_box_aspect(1)
+        ax.set_xlabel("move $t$", labelpad=1); ax.set_ylabel("$a_t$", labelpad=1)
         f, p = periodogram(a - a.mean(), fs=1.0, nfft=64)
-        ins = ax.inset_axes([0.42, 0.62, 0.56, 0.34])
+        ins = ax.inset_axes([0.42, 0.56, 0.56, 0.3])
         ins.fill_between(f[1:], p[1:] / p[1:].max(), color=MUTED, lw=0)
         c = (f[1:] * p[1:]).sum() / p[1:].sum()
         ins.axvline(c, color=FF, lw=1.1)
         ins.set_xlim(0, 0.5); ins.set_ylim(0, 1.15); ins.set_xticks([0, 0.5]); ins.set_yticks([])
-        ins.tick_params(labelsize=5.5, length=2, pad=1)
-        ins.text(0.25, 1.22, "spectrum of $a_t$", fontsize=5.5, ha="center", va="bottom", color=MUTED)
+        ins.tick_params(labelsize=6, length=2, pad=1)
+        ins.text(0.25, 1.2, "spectrum of $a_t$", fontsize=6, ha="center", va="bottom", color=MUTED)
     for k in range(5):
         axes[0, k].set_title(titles[k], fontsize=8, pad=8, linespacing=1.25)
-        letter(axes[0, k], "abcde"[k], x=-0.02, y=1.17)
+        letter(axes[0, k], "abcde"[k], x=-0.08, y=1.5)
     for r, lab in enumerate(["lower value", "higher value"]):
-        axes[r, 0].text(-0.22, 0.5, lab, transform=axes[r, 0].transAxes, rotation=90, va="center", ha="center", fontsize=8, color=INK)
+        axes[r, 0].text(-0.3, 0.5, lab, transform=axes[r, 0].transAxes, rotation=90, va="center", ha="center", fontsize=8, color=INK)
     save(fig, out_dir, "Figure1")
 
 
@@ -134,10 +138,10 @@ def figure2(out_dir):
     cnt = pd.read_csv("data/corpus_table.csv", low_memory=False)
     pool = cnt[(cnt.n_sent_source >= 5) & (cnt.n_sent_traj >= 5)]
     sample = pd.read_csv("data/sample_rows.csv")[["genre", "row"]].merge(cnt, on=["genre", "row"])
-    fig, axes = plt.subplots(2, 3, figsize=(7.4, 3.9), gridspec_kw={"wspace": 0.3, "hspace": 0.55})
-    cols = [(pool, "n_sent_source", "wps_source", "Texts eligible for matching", "Sentences (source text)", "Words per sentence (source text)", True),
-            (sample, "n_sent_source", "wps_source", "Sample: matching variables", "Sentences (source text)", "Words per sentence (source text)", False),
-            (sample, "n_sent_traj", "wps_traj", "Sample: trajectories", "Sentences (trajectory)", "Words per sentence (trajectory)", False)]
+    fig, axes = plt.subplots(2, 3, figsize=(6.0, 3.7), gridspec_kw={"wspace": 0.3, "hspace": 0.75})
+    cols = [(pool, "n_sent_source", "wps_source", "Texts eligible for matching", "Sentences\n(source text)", "Words per sentence\n(source text)", True),
+            (sample, "n_sent_source", "wps_source", "Sample: matching variables", "Sentences\n(source text)", "Words per sentence\n(source text)", False),
+            (sample, "n_sent_traj", "wps_traj", "Sample: trajectories", "Sentences\n(trajectory)", "Words per sentence\n(trajectory)", False)]
     for c, (d, ns, ws, title, xl1, xl2, log) in enumerate(cols):
         for g, lab, col in GENRES:
             v = d[d.genre == g]
@@ -147,7 +151,7 @@ def figure2(out_dir):
             axes[0, c].set_xscale("log")
         axes[0, c].set_xlabel(xl1); axes[1, c].set_xlabel(xl2)
         axes[0, c].set_title(title, fontsize=8, pad=8)
-        letter(axes[0, c], "abc"[c], x=-0.04, y=1.05)
+        letter(axes[0, c], "abc"[c], x=-0.04, y=1.2)
         for r in (0, 1):
             axes[r, c].set_yticks([]); axes[r, c].set_ylim(bottom=0)
             axes[r, c].set_ylabel("Density" if c == 0 else "")
@@ -156,14 +160,14 @@ def figure2(out_dir):
         axes[r, 1].set_xlim(lo, hi); axes[r, 2].set_xlim(lo, hi)
     handles = [plt.Line2D([], [], color=col, lw=1.4, label=lab) for _, lab, col in GENRES]
     handles.append(plt.Line2D([], [], color=MUTED, lw=0.9, ls=(0, (3, 2)), label="median"))
-    fig.legend(handles=handles, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.08), fontsize=8)
+    fig.legend(handles=handles, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.1), fontsize=8)
     save(fig, out_dir, "Figure2")
 
 
 # ------------------------------------------------------------------ Figure 3: distributions of the measures
 def figure3(out_dir):
     d = pd.read_csv(CORE + "ko-sroberta-multitask/Pure_Metrics_Data_Final_5D.csv")
-    fig, axes = plt.subplots(1, 5, figsize=(7.4, 2.7), gridspec_kw={"wspace": 0.7})
+    fig, axes = plt.subplots(1, 5, figsize=(6.0, 2.5), gridspec_kw={"wspace": 1.25})
     for k, (m, lab) in enumerate(METRICS):
         ax = axes[k]
         data = [d.loc[d.genre == g, m].values for g, _, _ in GENRES]
@@ -179,7 +183,7 @@ def figure3(out_dir):
             ax.text(1.66, 2 * np.pi / 3, r"$2\pi/3$", fontsize=6.5, va="center", ha="left", color=MUTED, clip_on=False)
         ax.set_xticks([0, 1]); ax.set_xticklabels(["FF", "PP"]); ax.set_xlim(-0.6, 1.6)
         ax.set_title(lab.replace(" $", "\n$"), fontsize=8, pad=6, linespacing=1.25)
-        letter(ax, "abcde"[k], x=-0.2, y=1.1)
+        letter(ax, "abcde"[k], x=-0.5, y=1.2)
     handles = [plt.Rectangle((0, 0), 1, 1, fc=col, alpha=0.45, ec=col, label=f"{lab} ({short})") for (_, lab, col), short in zip(GENRES, ["FF", "PP"])]
     fig.legend(handles=handles, loc="lower center", ncol=2, bbox_to_anchor=(0.5, -0.09), fontsize=8)
     save(fig, out_dir, "Figure3")
@@ -188,7 +192,7 @@ def figure3(out_dir):
 # ------------------------------------------------------------------ Figure 4: effect sizes under three encoders
 def figure4(out_dir):
     e = pd.read_csv(NUM + "effect_sizes.csv")
-    fig, ax = plt.subplots(figsize=(5.2, 3.3))
+    fig, ax = plt.subplots(figsize=(4.3, 3.1))
     offsets = [0.24, 0.0, -0.24]
     for k, (m, lab) in enumerate(METRICS):
         y0 = len(METRICS) - 1 - k
@@ -210,9 +214,12 @@ def figure4(out_dir):
     top.set_xlabel("Probability that a flash-fiction text has the larger value", labelpad=5)
     top.set_xticks([0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65])
     handles = [plt.Line2D([], [], marker=mk, ls="", ms=5.5, mec=INK, mfc=INK, label=lab) for _, lab, mk in ENCODERS]
-    handles += [plt.Line2D([], [], marker="o", ls="", ms=5.5, mec=INK, mfc=INK, label=r"length-controlled $p < 0.05$"),
-                plt.Line2D([], [], marker="o", ls="", ms=5.5, mec=INK, mfc="white", label=r"length-controlled $p \geq 0.05$")]
-    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.02, 1.0), fontsize=7.5, handletextpad=0.4, labelspacing=0.7)
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.42, -0.02), ncol=3, fontsize=7.5, handletextpad=0.3, columnspacing=1.2)
+    # fill of the marker: one key that shows the three shapes together, filled and open
+    key = lambda fill: tuple(plt.Line2D([], [], marker=mk, ls="", ms=5, mec=INK, mew=1.0, mfc=fill) for _, _, mk in ENCODERS)
+    fig.legend(handles=[key(INK), key("white")], labels=[r"length-controlled $p < 0.05$", r"length-controlled $p \geq 0.05$"],
+               handler_map={tuple: HandlerTuple(ndivide=None, pad=0.5)}, handlelength=3.4,
+               loc="upper center", bbox_to_anchor=(0.42, -0.085), ncol=2, fontsize=7.5, handletextpad=0.5, columnspacing=1.6)
     save(fig, out_dir, "Figure4")
 
 
@@ -231,7 +238,7 @@ def figure_s1(out_dir):
         k = gaussian_kde(dist[g])
         ax.fill_between(grid, k(grid), color=col, alpha=0.28, lw=0); ax.plot(grid, k(grid), color=col, lw=1.1, label=lab)
         ax.axvline(np.median(dist[g]), color=col, lw=0.9, ls=(0, (3, 2)))
-    ax.set_xlabel("Distance to the genre centroid (standardised measures)"); ax.set_ylabel("Density")
+    ax.set_xlabel("Distance to the genre centre (standardised measures)"); ax.set_ylabel("Density")
     ax.set_yticks([]); ax.set_ylim(bottom=0); ax.legend(fontsize=7.5)
     save(fig, out_dir, "FigureS1")
 
@@ -240,6 +247,7 @@ def figure_s2(out_dir):
     d = pd.read_csv(CORE + "ko-sroberta-multitask/Pure_Metrics_Data_Final_5D.csv")
     short = [r"$\delta$", r"$\sigma_S$", r"$\mathcal{R}$", r"$\kappa$", r"$\Omega$"]
     n = len(METRICS)
+    lim = {m: (d[m].min() - 0.08 * (d[m].max() - d[m].min()), d[m].max() + 0.08 * (d[m].max() - d[m].min())) for m, _ in METRICS}
     fig, axes = plt.subplots(n, n, figsize=(7.2, 7.2), gridspec_kw={"wspace": 0.12, "hspace": 0.12})
     for i, (mi, _) in enumerate(METRICS):
         for j, (mj, _) in enumerate(METRICS):
@@ -249,15 +257,19 @@ def figure_s2(out_dir):
             for g, lab, col in GENRES:
                 v = d[d.genre == g]
                 if i == j:
-                    k = gaussian_kde(v[mi]); grid = np.linspace(d[mi].min(), d[mi].max(), 200)
+                    k = gaussian_kde(v[mi]); grid = np.linspace(*lim[mi], 200)
                     ax.fill_between(grid, k(grid), color=col, alpha=0.28, lw=0); ax.plot(grid, k(grid), color=col, lw=1.0)
                 else:
                     ax.scatter(v[mj], v[mi], s=3, color=col, alpha=0.22, lw=0, rasterized=True)
                     k = gaussian_kde(np.vstack([v[mj], v[mi]]))
                     gx, gy = np.meshgrid(np.linspace(d[mj].min(), d[mj].max(), 60), np.linspace(d[mi].min(), d[mi].max(), 60))
+                    levels = np.quantile(k(np.vstack([gx.ravel(), gy.ravel()])), [0.8, 0.93])   # heights on a grid over the data range
+                    gx, gy = np.meshgrid(np.linspace(*lim[mj], 90), np.linspace(*lim[mi], 90))  # drawn over the whole panel
                     z = k(np.vstack([gx.ravel(), gy.ravel()])).reshape(gx.shape)
-                    ax.contour(gx, gy, z, levels=np.quantile(z, [0.8, 0.93]), colors=[col], linewidths=0.9)
-            ax.tick_params(labelsize=6, length=2)
+                    ax.contour(gx, gy, z, levels=levels, colors=[col], linewidths=0.9)
+            ax.tick_params(labelsize=6.5, length=2)
+            ax.set_xlim(*lim[mj])
+            if i != j: ax.set_ylim(*lim[mi])
             if i < n - 1: ax.set_xticklabels([])
             else: ax.set_xlabel(short[j], fontsize=9)
             if j > 0 or i == 0: ax.set_yticklabels([])

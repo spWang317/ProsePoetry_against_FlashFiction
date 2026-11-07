@@ -11,6 +11,7 @@ sample = pd.read_csv("data/sample_rows.csv")
 q = lambda x: f"{x.median():.1f} [{x.quantile(.25):.1f}, {x.quantile(.75):.1f}]"
 
 print("analysis sample:", sample.groupby("genre").size().to_dict())
+print(f"corpus total: {len(cnt)} | at least five sentences under both splits, total: {int(((cnt.n_sent_source >= 5) & (cnt.n_sent_traj >= 5)).sum())}")
 
 for genre, bookcol in [("FlashFiction", "book_title"), ("ProsePoem", "book_title")]:
     d = cnt[cnt.genre == genre].copy()
