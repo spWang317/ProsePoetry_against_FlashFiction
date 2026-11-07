@@ -1,4 +1,4 @@
-"""Sensitivity check, not reported in the article: the genre coefficient of each measure when the trajectory words
+"""Sensitivity check (Supplementary Table S7): the genre coefficient of each measure when the trajectory words
 per sentence are added as a second covariate.  Model A (the article): measure ~ genre + log(1 + T).
 Model B: measure ~ genre + log(1 + T) + trajectory words per sentence.  HC3 standard errors, as in the article.
 Inputs: outputs/statistics/<encoder>/Pure_Metrics_Data_Final_5D.csv, data/sample_rows.csv, data/corpus_table.csv.
@@ -8,6 +8,8 @@ Run from the repository root:
 import os, numpy as np, pandas as pd, statsmodels.formula.api as smf
 
 R = "."
+CSV_OUT = "outputs/words_per_sentence_check.csv"
+rows = []
 s = pd.read_csv(os.path.join(R, "data", "sample_rows.csv"))
 c = pd.read_csv(os.path.join(R, "data", "corpus_table.csv"))
 key = s.merge(c[["genre", "row", "wps_traj", "n_sent_traj"]], on=["genre", "row"], how="left")
@@ -23,6 +25,10 @@ for model in ["ko-sroberta-multitask", "bge-m3", "multilingual-e5-large"]:
         a = smf.ols(f"{met} ~ is_flash + log_n_sent", data=d).fit(cov_type="HC3")
         b = smf.ols(f"{met} ~ is_flash + log_n_sent + wps_traj", data=d).fit(cov_type="HC3")
         print(f"{model:24s} {name:8s} {a.params['is_flash']:+9.4f} {a.pvalues['is_flash']:7.3f} {b.params['is_flash']:+9.4f} {b.pvalues['is_flash']:7.3f} {b.params['wps_traj']:+9.4f} {b.pvalues['wps_traj']:7.3f}")
+        rows.append({"encoder": model, "metric": met, "beta_A": a.params["is_flash"], "CI_A_low": a.conf_int().loc["is_flash", 0], "CI_A_high": a.conf_int().loc["is_flash", 1], "p_A": a.pvalues["is_flash"],
+                     "beta_B": b.params["is_flash"], "CI_B_low": b.conf_int().loc["is_flash", 0], "CI_B_high": b.conf_int().loc["is_flash", 1], "p_B": b.pvalues["is_flash"],
+                     "wps_coef": b.params["wps_traj"], "wps_p": b.pvalues["wps_traj"]})
+pd.DataFrame(rows).to_csv(CSV_OUT, index=False)
 print("\nSpearman correlation of wps_traj with each measure (primary model), and genre medians of wps_traj:")
 m = pd.read_csv(os.path.join(R, "outputs", "statistics", "ko-sroberta-multitask", "Pure_Metrics_Data_Final_5D.csv"))
 d = m.merge(key.rename(columns={"sample_index": "pkl_index"})[["genre", "pkl_index", "wps_traj"]], on=["genre", "pkl_index"])

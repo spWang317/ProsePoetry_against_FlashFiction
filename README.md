@@ -28,7 +28,7 @@ code/
   04_distribution_statistics.py
   05_sample_composition.py
   06_figures.py
-  07_words_per_sentence_check.py  sensitivity check: trajectory words per sentence as a second covariate (not reported in the article)
+  07_words_per_sentence_check.py  sensitivity check: trajectory words per sentence as a second covariate (Supplementary Table S7)
 outputs/                   output of the scripts above, as reported in the article
 environment/               software environment of the segmentation and embedding stage
 requirements.txt           software environment of the analysis
@@ -75,7 +75,7 @@ The scripts overwrite the files in `outputs/`. The bootstrap intervals in `03_ta
 | Ablation | `outputs/statistics/*/Ablation_Study_Results_5D.csv` (`Drop_*` = all five measures minus the reduced set; positive values are a loss) |
 | Distribution statistics | `outputs/statistics/ko-sroberta-multitask/Distribution_Statistics.csv` |
 | Figures | `outputs/figures/` |
-| Genre coefficients with trajectory words per sentence as a second covariate (sensitivity check, not reported in the article) | `outputs/words_per_sentence_check.txt` |
+| Genre coefficients with trajectory words per sentence as a second covariate (Supplementary Table S7) | `outputs/words_per_sentence_check.csv`, `outputs/words_per_sentence_check.txt` |
 
 `outputs/statistics/<encoder>/` also holds the measures of every text (`Pure_Metrics_Data_Final_5D.csv`), the per-measure tests (`Final_Summary_Table_5D.csv`), the multivariate test (`PERMANOVA_Result_5D.txt`) and a log (`Stability_Log.txt`).
 
