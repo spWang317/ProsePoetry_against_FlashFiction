@@ -18,7 +18,7 @@ data/
                            records written by the two scripts that need the source texts
 code/
   requires_source_texts/
-    segment_corpus.py      sentence segmentation of every text; writes data/corpus_table.csv
+    segment_corpus.py      sentence segmentation of the texts of the corpus; writes data/corpus_table.csv
     embed_sample.py        sentence embeddings of the analysis sample under three encoders, word-level baseline
   01_length_matching.py    length matching of the two genres
   02_export_embeddings.py  transformation applied to the encoder outputs (needs the outputs of embed_sample.py,
@@ -38,7 +38,7 @@ LICENSE-DATA               licence of the data and outputs (CC BY 4.0)
 
 ## Reproducing the results
 
-The analysis runs in this order: `segment_corpus.py` → `01` → `embed_sample.py` → `02` → `measures_and_statistics.py` → `03` to `07`. The two scripts in `requires_source_texts/` and `02_export_embeddings.py` need files that are not included; their outputs are in `data/`. The other steps run on the files of this repository:
+The analysis runs in this order: `segment_corpus.py` → `01` → `embed_sample.py` → `02` → `measures_and_statistics.py` → `03` to `07`. The two scripts in `requires_source_texts/` and `02_export_embeddings.py` need files that are not included; their outputs are in `data/`. The other steps run on the files of this repository.
 
 Python 3.12 with the packages in `requirements.txt` (the embedding files need NumPy 2). Run from the repository root.
 
@@ -77,19 +77,19 @@ The scripts overwrite the files in `outputs/`. The bootstrap intervals in `03_ta
 | Figures | `outputs/figures/` |
 | Genre coefficients with trajectory words per sentence as a second covariate (Supplementary Table S7) | `outputs/words_per_sentence_check.csv`, `outputs/words_per_sentence_check.txt` |
 
-`outputs/statistics/<encoder>/` also holds the measures of every text (`Pure_Metrics_Data_Final_5D.csv`), the per-measure tests (`Final_Summary_Table_5D.csv`), the multivariate test (`PERMANOVA_Result_5D.txt`) and a log (`Stability_Log.txt`).
+`outputs/statistics/<encoder>/` also holds the measures of every text (`Pure_Metrics_Data_Final_5D.csv`; `n_sent` is the trajectory sentence count and `n_sent_matching` the source-text sentence count), the per-measure tests (`Final_Summary_Table_5D.csv`), the multivariate test (`PERMANOVA_Result_5D.txt`) and a log (`Stability_Log.txt`).
 
 ## Data
 
 ### `data/corpus_table.csv`
 
-One row per text of the corpus (2,795 flash-fiction texts, 5,131 prose poems). `row` identifies the text within its genre. The sentence counts are written by `requires_source_texts/segment_corpus.py`; the bibliographic columns are the record of the source files.
+One row per text of the corpus (2,795 flash-fiction texts, 5,131 prose poems). `row` is the row of the text in its source file; source rows that are not part of the corpus do not appear in the table. The sentence counts are written by `requires_source_texts/segment_corpus.py --rows data/corpus_table.csv`, which segments the listed rows; the bibliographic columns identify the text (book, work, author, publisher, year, series number, ISBN).
 
 | Column | Meaning |
 |---|---|
 | `genre`, `row` | `FlashFiction` or `ProsePoem`, and the identifier of the text |
 | `n_sent_source`, `wps_source` | number of sentences and mean words per sentence when the source text is split as it is; used for matching. After splitting, characters other than Hangul, digits, whitespace and `. ? ! ,` are replaced by spaces in each sentence and sentences of two characters or fewer are dropped |
-| `n_sent_traj`, `wps_traj` | the same after symbols other than Hangul, digits and `. ? ! ,` are removed before splitting; these sentences are embedded |
+| `n_sent_traj`, `wps_traj` | the same when characters other than Hangul, digits, whitespace and `. ? ! ,` are replaced by spaces before splitting; these sentences are embedded |
 | `book_title`, `work_title`, `author`, `publisher`, `year` | bibliographic record |
 | `series`, `series_number` | poetry series and volume number (prose poems) |
 | `isbn`, `nationality` | ISBN of the book and nationality of the author (flash fiction) |
@@ -129,7 +129,7 @@ Computed in `code/measures_and_statistics.py` (`compute_5d_metrics`) from the un
 
 ## Stages that need the source texts
 
-- `segment_corpus.py` splits every text into sentences under the two splits and writes `data/corpus_table.csv` and `data/segmentation_record.json` (sentence splitter and its backend, number of texts for which the fallback split was used: none).
+- `segment_corpus.py` splits the texts listed in `data/corpus_table.csv` (`--rows`) into sentences under the two splits and writes `data/corpus_table.csv` and `data/segmentation_record.json` (sentence splitter and its backend, number of texts for which the fallback split was used: none).
 - `embed_sample.py` embeds the trajectory sentences of the analysis sample with the three encoders at fixed model revisions, counts the sentences longer than the input limit of each encoder, and computes the word-level baseline. It writes the encoder outputs that `02_export_embeddings.py` transforms, `data/embeddings/word_baseline.json` and `data/embedding_record.json`.
 
 Sentence splitting uses KSS 6.0.6 with the Mecab backend through konlpy. With a different backend the sentence boundaries differ. The environment of this stage is recorded in `environment/` (conda export, `pip freeze`, the backend selected by KSS, and the Mecab installation). Mecab (mecab-ko 0.996/ko-0.9.2) and its dictionary (mecab-ko-dic) are system packages and have to be installed separately.

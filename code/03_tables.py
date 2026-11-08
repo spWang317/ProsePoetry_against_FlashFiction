@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tables reported in the manuscript, computed from the sentence-embedding files of three encoders.
+"""Tables reported in the article, computed from the sentence-embedding files of three encoders.
 
 Run from the repository root:
     python code/03_tables.py --out_dir outputs/tables
@@ -9,14 +9,14 @@ Outputs (CSV, one file per table) and a run record (run_info.json):
     effect_sizes.csv             Cliff's delta, probability of superiority, bootstrap CI, MWU, OLS
     permanova.csv                multivariate location and dispersion, variance explained
     classification.csv           document-level classification from length and from the five measures
-    spectral_window.csv          documents whose step series exceeds the 64-point window
+    spectral_window.csv          documents whose series of move lengths exceeds the 64-point window
     metric_relations.csv         rank correlations between the five measures
 """
 import os, sys, json, pickle, hashlib, argparse, warnings, platform
 import numpy as np, pandas as pd
 import scipy, sklearn, statsmodels
 import statsmodels.formula.api as smf
-from scipy.stats import mannwhitneyu, spearmanr
+from scipy.stats import mannwhitneyu
 from scipy.spatial.distance import pdist, squareform
 from statsmodels.stats.multitest import multipletests
 from sklearn.dummy import DummyClassifier
@@ -168,7 +168,7 @@ def classification(df, encoder):
 
 
 def spectral_window(df):
-    """The spectrum uses a 64-point window: shorter step series are zero-padded, longer ones use their first 64 steps."""
+    """The spectrum uses a 64-point window: shorter series of moves are zero-padded, longer ones use their first 64 moves."""
     steps = df["T"] - 1
     return pd.DataFrame([{"genre": g, "documents": int((df.genre == g).sum()),
                           "step_series_longer_than_64": int(((df.genre == g) & (steps > 64)).sum()),

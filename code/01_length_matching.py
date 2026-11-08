@@ -13,7 +13,6 @@ import numpy as np, pandas as pd
 
 
 def stratified_match(df_a, df_b, seed=42, s_step=2, d_step=1.5, min_per_bin=2):
-    rng = np.random.default_rng(seed)
     a, b = df_a.copy(), df_b.copy()
     
     s_min = min(a["n_sentences"].min(), b["n_sentences"].min())
@@ -53,6 +52,7 @@ m_ff, m_pp = stratified_match(pool["FlashFiction"], pool["ProsePoem"])
 
 
 def cells(a, b, s_step=2, d_step=1.5):
+    # the same cells as stratified_match; used only to print the counts of the stages
     s_bins = np.arange(np.floor(min(a.n_sentences.min(), b.n_sentences.min())), np.ceil(max(a.n_sentences.max(), b.n_sentences.max())) + s_step, s_step)
     d_bins = np.arange(np.floor(min(a.tokens_per_sent.min(), b.tokens_per_sent.min())), np.ceil(max(a.tokens_per_sent.max(), b.tokens_per_sent.max())) + d_step, d_step)
     return [pd.cut(d.n_sentences, bins=s_bins, include_lowest=True).astype(str) + "|" + pd.cut(d.tokens_per_sent, bins=d_bins, include_lowest=True).astype(str) for d in (a, b)]

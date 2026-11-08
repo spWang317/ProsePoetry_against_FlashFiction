@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Figures of the manuscript and the Supplementary Information.
+"""Figures of the article and the Supplementary Information.
 
 Run from the repository root:
     python code/06_figures.py --out_dir outputs/figures
@@ -100,7 +100,7 @@ def figure1(out_dir):
         if hi - lo < 60:                          # a narrow angle carries its label beside the arc, below the dashed line
             mid, rad = np.radians(lo - 30), 0.3
         ax.text(p2[0] + rad * np.cos(mid), p2[1] + rad * np.sin(mid), r"$\theta_t$", fontsize=7, ha="center", va="center", color=INK)
-    # e spectral centroid: step sizes and their periodogram
+    # e spectral centroid: move lengths and their periodogram
     t = np.arange(24)
     for ax, a in [(axes[0, 4], 0.5 + 0.35 * np.sin(2 * np.pi * t / 12)), (axes[1, 4], 0.5 + 0.35 * np.where(t % 2 == 0, 1, -1))]:
         ax.plot(t + 1, a, color=INK, lw=1.0, marker="o", ms=2.2)

@@ -93,8 +93,8 @@ def dispersion_check_full(X, groups, out_csv=None):
 # =========================================================
 # 2. The five measures
 # =========================================================
-# A step between two identical consecutive sentences has no direction. Such steps differ from
-# zero only by floating-point noise (below 2e-6 for the encoders used; every other step exceeds 0.06)
+# A move between two identical consecutive sentences has no direction. Such moves differ from
+# zero only by floating-point noise (below 2e-6 for the encoders used; every other move exceeds 0.06)
 # and are left out of the curvature.
 ZERO_STEP = 1e-4
 
@@ -145,10 +145,6 @@ DEFAULT_OUT_DIR = "outputs/statistics/ko-sroberta-multitask"
 
 def run_analysis(ff_pkl=DEFAULT_FF_PKL, pp_pkl=DEFAULT_PP_PKL, out_dir=DEFAULT_OUT_DIR):
     """ff_pkl / pp_pkl: embedding files; out_dir: where tables are written."""
-    # Set seed for exact reproducibility
-    np.random.seed(42)
-    
-    base_path = "."  
     os.makedirs(out_dir, exist_ok=True)
     
     # Load the embedding files
@@ -159,16 +155,15 @@ def run_analysis(ff_pkl=DEFAULT_FF_PKL, pp_pkl=DEFAULT_PP_PKL, out_dir=DEFAULT_O
     
     print("[Step 1] Loading Pre-computed Embeddings and Computing 5D Metrics...")
     for f_name, genre in targets:
-        pkl_path = os.path.join(base_path, f_name)
+        pkl_path = f_name
         if not os.path.exists(pkl_path):
-            print(f"Error: Pickle file not found at {pkl_path}")
-            continue
+            raise FileNotFoundError(pkl_path)
             
         with open(pkl_path, 'rb') as f:
             data = pickle.load(f)
         
         # Position of each document in the analysis sample.
-        doc_ids = data.get("pkl_index", list(range(len(data['embeddings']))))
+        doc_ids = data["pkl_index"]
         for i in tqdm(range(len(data['embeddings'])), desc=f"Analyzing {genre}"):
             embs = data['embeddings'][i]
             if embs is None or len(embs) < 5: 
@@ -243,7 +238,7 @@ def run_analysis(ff_pkl=DEFAULT_FF_PKL, pp_pkl=DEFAULT_PP_PKL, out_dir=DEFAULT_O
     
     # Multivariate Testing
     X_all = StandardScaler().fit_transform(df[metrics_list].values)
-    disp_res, disp_df = dispersion_check_full(X_all, df["genre"].values, out_csv=os.path.join(out_dir, "Dispersion_Check_5D.csv"))
+    disp_res, _ = dispersion_check_full(X_all, df["genre"].values, out_csv=os.path.join(out_dir, "Dispersion_Check_5D.csv"))
     f_stat, p_perm, ssa, ssw = _permanova_custom(squareform(pdist(X_all)), df["genre"].values)
     
     with open(os.path.join(out_dir, "PERMANOVA_Result_5D.txt"), "w") as f:

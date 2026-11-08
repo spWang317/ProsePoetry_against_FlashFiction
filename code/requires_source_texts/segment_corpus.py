@@ -4,7 +4,10 @@
 Needs the two source files (CSV with the full texts). They are under copyright and are not included.
 
     python code/requires_source_texts/segment_corpus.py --ff_csv <flash fiction> --pp_csv <prose poems> \
-        --out <folder> --private_dir <folder>
+        --rows data/corpus_table.csv --out <folder> --private_dir <folder>
+
+--rows limits the run to the source rows listed in that file (columns genre and row); without it every row of the
+source files is segmented.
 
 Every text is split into sentences twice with KSS:
     source-text split   the text as it is; its sentence count and words per sentence are used for the length matching
@@ -63,7 +66,7 @@ def words_per_sentence(sents):
 def segment(text, backend="auto"):
     """Sentence lists of one text under the two splits, and whether the fallback split was used."""
     raw = str(text)
-    pre = re.sub(r'[^가-힣0-9\s.\?!\.,]', ' ', raw).strip()      # trajectory split: symbols removed before splitting
+    pre = re.sub(r'[^가-힣0-9\s.\?!,]', ' ', raw).strip()        # trajectory split: other characters replaced by spaces before splitting
     t = raw.strip() if isinstance(text, str) else ""             # source-text split: the text as it is
     if pre:
         s, f_traj = _split(pre, backend)
@@ -141,9 +144,13 @@ def main():
     ap.add_argument("--private_dir", required=True, help="folder for the sentence lists (text)")
     ap.add_argument("--kss_backend", default="auto")
     ap.add_argument("--workers", type=int, default=max(1, min(32, (os.cpu_count() or 4) - 2)))
+    ap.add_argument("--rows", help="CSV with the columns genre and row (data/corpus_table.csv): only these source rows are segmented")
     args = ap.parse_args()
     paths = {"FlashFiction": args.ff_csv, "ProsePoem": args.pp_csv}
     frames = {g: pd.read_csv(paths[g], low_memory=False) for g in GENRES}
+    if args.rows:
+        keep = pd.read_csv(args.rows, usecols=["genre", "row"])
+        frames = {g: f.loc[sorted(keep.loc[keep.genre == g, "row"].astype(int))] for g, f in frames.items()}
     build(frames, args.out, args.private_dir, args.workers, args.kss_backend)
 
 

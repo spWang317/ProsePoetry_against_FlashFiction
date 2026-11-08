@@ -1,4 +1,4 @@
-genre coefficient (flash fiction = 1), HC3; A = + log(1+T) [manuscript], B = + log(1+T) + trajectory words per sentence
+genre coefficient (flash fiction = 1), HC3; A = + log(1+T) (the article), B = + log(1+T) + trajectory words per sentence
 model                    measure     beta_A     p_A    beta_B     p_B  wps coef   p_wps
 ko-sroberta-multitask    δ          +0.0498   0.000   +0.0468   0.000   -0.0036   0.066
 ko-sroberta-multitask    σ_S        +0.0049   0.009   +0.0039   0.033   -0.0012   0.003
