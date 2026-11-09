@@ -7,12 +7,12 @@ Needs the sentence lists written by segment_corpus.py (text; not included).
 
 The trajectory sentences of every sampled text are embedded with the three encoders (unit-length vectors,
 one row per sentence). The word-level baseline classifies the genre of a text from the words of its
-trajectory sentences (TF-IDF, logistic regression, 10-fold stratified cross-validation).
+trajectory sentences (TF-IDF; random forest and logistic regression, 10-fold stratified cross-validation).
 
 Outputs in --out (no text)
     <Genre>_embs_<encoder>.pkl   sentence embeddings and lengths of the sampled texts, in the order of the sample
                                  (input of 02_export_embeddings.py)
-    word_baseline.json           cross-validated scores of the word-level classifier
+    word_baseline.json           cross-validated scores of the word-level classifiers (random forest, logistic regression)
     embedding_record.json        software versions, encoder revisions, sentences longer than the input limit
 """
 import os, sys, json, time, pickle, argparse, platform
@@ -73,6 +73,7 @@ def main():
     from sentence_transformers import SentenceTransformer
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.linear_model import LogisticRegression
+    from sklearn.ensemble import RandomForestClassifier
     from sklearn.model_selection import StratifiedKFold, cross_validate
     from sklearn.pipeline import make_pipeline
 
@@ -124,16 +125,20 @@ def main():
     # word-level baseline
     texts = np.array([" ".join(sl) for genre in GENRES for sl in docs[genre][1]], dtype=object)
     y = np.array([1 if genre == "FlashFiction" else 0 for genre in GENRES for _ in docs[genre][1]])
-    pipe = make_pipeline(TfidfVectorizer(analyzer="word", token_pattern=r"(?u)\S+", min_df=2, sublinear_tf=True),
-                         LogisticRegression(max_iter=5000))
-    cv = cross_validate(pipe, texts, y, cv=StratifiedKFold(10, shuffle=True, random_state=42),
-                        scoring=["accuracy", "f1", "roc_auc"])
-    bow = {"n_flash_fiction": int(y.sum()), "n_prose_poem": int((1 - y).sum()),
-           **{k: {"mean": float(cv[f"test_{k}"].mean()), "sd": float(cv[f"test_{k}"].std()),
-                  "folds": cv[f"test_{k}"].tolist()} for k in ["accuracy", "f1", "roc_auc"]}}
+    # the same two classifiers as the length and five-measure rows of Table 3 (03_tables.py), on the TF-IDF vectors
+    vectorizer = lambda: TfidfVectorizer(analyzer="word", token_pattern=r"(?u)\S+", min_df=2, sublinear_tf=True)
+    classifiers = {"random_forest": RandomForestClassifier(n_estimators=300, random_state=42, class_weight="balanced"),
+                   "logistic_regression": LogisticRegression(max_iter=5000)}
+    bow = {"n_flash_fiction": int(y.sum()), "n_prose_poem": int((1 - y).sum())}
+    for name, clf in classifiers.items():
+        cv = cross_validate(make_pipeline(vectorizer(), clf), texts, y, cv=StratifiedKFold(10, shuffle=True, random_state=42),
+                            scoring=["accuracy", "f1", "roc_auc"], error_score="raise")
+        bow[name] = {k: {"mean": float(cv[f"test_{k}"].mean()), "sd": float(cv[f"test_{k}"].std()),
+                         "folds": cv[f"test_{k}"].tolist()} for k in ["accuracy", "f1", "roc_auc"]}
     json.dump(bow, open(os.path.join(args.out, "word_baseline.json"), "w"), indent=1, ensure_ascii=False)
     json.dump(record, open(os.path.join(args.out, "embedding_record.json"), "w"), indent=1, ensure_ascii=False)
-    print("word-level baseline: " + ", ".join(f"{k} {bow[k]['mean']:.3f} (sd {bow[k]['sd']:.3f})" for k in ["accuracy", "f1", "roc_auc"]))
+    for name in classifiers:
+        print(f"word-level baseline, {name.replace('_', ' ')}: " + ", ".join(f"{k} {bow[name][k]['mean']:.3f} (sd {bow[name][k]['sd']:.3f})" for k in ["accuracy", "f1", "roc_auc"]))
     print("sentences longer than the input limit:", record["token_limits"])
 
 

@@ -60,4 +60,5 @@ multilingual-e5-large length (trajectory sentences, words per sentence)       ra
 multilingual-e5-large length (trajectory sentences, words per sentence) logistic regression     0.584        0.055 0.605  0.062  0.601     0.051
 multilingual-e5-large                                     five measures       random forest     0.615        0.040 0.603  0.050  0.648     0.041
 multilingual-e5-large                                     five measures logistic regression     0.603        0.060 0.613  0.061  0.637     0.065
+                    -                                    words (TF-IDF)       random forest     0.780        0.043 0.785  0.045  0.872     0.033
                     -                                    words (TF-IDF) logistic regression     0.835        0.047 0.833  0.050  0.919     0.035

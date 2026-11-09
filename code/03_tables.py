@@ -8,7 +8,7 @@ Outputs (CSV, one file per table) and a run record (run_info.json):
     length_parity.csv            sentence counts and words per sentence of the two genres
     effect_sizes.csv             Cliff's delta, probability of superiority, bootstrap CI, MWU, OLS
     permanova.csv                multivariate location and dispersion, variance explained
-    classification.csv           document-level classification from length and from the five measures
+    classification.csv           document-level classification from length, from the words and from the five measures
     spectral_window.csv          documents whose series of move lengths exceeds the 64-point window
     metric_relations.csv         rank correlations between the five measures
 """
@@ -40,7 +40,7 @@ ENCODERS = {  # label -> embedding files (flash fiction, prose poetry)
     "bge-m3": (EMB + "FlashFiction_embs_bge-m3.pkl", EMB + "ProsePoem_embs_bge-m3.pkl"),
     "multilingual-e5-large": (EMB + "FlashFiction_embs_me5-large.pkl", EMB + "ProsePoem_embs_me5-large.pkl"),
 }
-WORD_BASELINE = EMB + "word_baseline.json"   # TF-IDF classifier, computed with the source texts
+WORD_BASELINE = EMB + "word_baseline.json"   # TF-IDF classifiers (random forest, logistic regression), computed with the source texts
 N_BOOT = 10000
 
 
@@ -208,9 +208,11 @@ def main():
     cl = [r for enc, df in data.items() for r in classification(df, enc)]
     bow = json.load(open(WORD_BASELINE))
     assert bow["n_flash_fiction"] == int(ref.is_flash.sum()) and bow["n_prose_poem"] == int((1 - ref.is_flash).sum())
-    cl.append({"encoder": "-", "features": "words (TF-IDF)", "classifier": "logistic regression",
-               "accuracy": bow["accuracy"]["mean"], "accuracy_sd": bow["accuracy"]["sd"], "F1": bow["f1"]["mean"],
-               "F1_sd": bow["f1"]["sd"], "AUROC": bow["roc_auc"]["mean"], "AUROC_sd": bow["roc_auc"]["sd"]})
+    for name in ["random_forest", "logistic_regression"]:
+        r = bow[name]
+        cl.append({"encoder": "-", "features": "words (TF-IDF)", "classifier": name.replace("_", " "),
+                   "accuracy": r["accuracy"]["mean"], "accuracy_sd": r["accuracy"]["sd"], "F1": r["f1"]["mean"],
+                   "F1_sd": r["f1"]["sd"], "AUROC": r["roc_auc"]["mean"], "AUROC_sd": r["roc_auc"]["sd"]})
     print("\n== classification"); print(save(cl, "classification.csv").round(3).to_string(index=False))
     inputs = sorted({p for f in ENCODERS.values() for p in f} | {WORD_BASELINE})
     info = {"python": platform.python_version(), "platform": platform.platform(), "numpy": np.__version__,

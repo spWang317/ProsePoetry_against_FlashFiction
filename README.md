@@ -113,7 +113,7 @@ Encoders: `jhgan/ko-sroberta-multitask` (768 dimensions), `BAAI/bge-m3` (1,024),
 
 **The embeddings of each text have been multiplied by an orthogonal matrix drawn at random for that text** (`02_export_embeddings.py`). This keeps every distance, angle and cosine similarity between the sentences of a text, so the five measures and all statistics are reproduced. The transformation is designed to prevent the copyrighted sentences from being reconstructed from the vectors. The matrices were not stored. As a consequence the vectors of different texts cannot be compared with each other, and they are not in the embedding space of the encoder.
 
-`word_baseline.json` holds the cross-validated scores of the word-level classifier (TF-IDF of the words of the trajectory sentences, logistic regression). It is written by `requires_source_texts/embed_sample.py`.
+`word_baseline.json` holds the cross-validated scores of the two word-level classifiers (TF-IDF of the words of the trajectory sentences; random forest and logistic regression with the settings of `03_tables.py`). It is written by `requires_source_texts/embed_sample.py`.
 
 ## The five measures
 

@@ -9,7 +9,7 @@
  "seed": 42,
  "bootstrap_resamples": 10000,
  "scripts_md5": {
-  "code/03_tables.py": "f55f07a266a7fd4708aea15afc908d6c",
+  "code/03_tables.py": "2aee0702f474823234943110bd515e4e",
   "code/measures_and_statistics.py": "dc4675e16a904ff7b4cd6fcd2c3a0946"
  },
  "inputs_md5": {
@@ -19,6 +19,6 @@
   "data/embeddings/ProsePoem_embs_bge-m3.pkl": "379788a3bfc930adbb703f43dfa97561",
   "data/embeddings/ProsePoem_embs_ko-sroberta-multitask.pkl": "bff984da69b090d02645210cd49d8902",
   "data/embeddings/ProsePoem_embs_me5-large.pkl": "8da6ead60b5d73ab79dbe47cbe94065d",
-  "data/embeddings/word_baseline.json": "6a3f068d19d48cbb1e5b7c100fc54878"
+  "data/embeddings/word_baseline.json": "5400eada7b39ff74a5cd726e0f7ba176"
  }
 }
