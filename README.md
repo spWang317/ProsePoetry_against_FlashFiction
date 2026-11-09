@@ -72,7 +72,7 @@ The scripts overwrite the files in `outputs/`. The bootstrap intervals in `03_ta
 | Texts whose series of move lengths exceeds the 64-point window | `outputs/tables/spectral_window.csv` |
 | Sentences longer than the input limit of an encoder, use of the fallback sentence split | `data/embedding_record.json`, `data/segmentation_record.json` |
 | Correlations between the measures, variance inflation factors | `outputs/statistics/*/Metric_Orthogonality_Spearman.csv`, `Metric_VIF_5D.csv`, `outputs/tables/metric_relations.csv` |
-| Ablation | `outputs/statistics/*/Ablation_Study_Results_5D.csv` (`Drop_*` = all five measures minus the reduced set; positive values are a loss) |
+| Ablation (random forest and logistic regression, `Classifier` column) | `outputs/statistics/*/Ablation_Study_Results_5D.csv` (`Drop_*` = the F1 or AUROC with all five measures minus the value with one measure left out, per classifier; positive values are a loss, the negative of the change reported in Supplementary Table S6) |
 | Distribution statistics | `outputs/statistics/ko-sroberta-multitask/Distribution_Statistics.csv` |
 | Figures | `outputs/figures/` |
 | Genre coefficients with trajectory words per sentence as a second covariate (Supplementary Table S7) | `outputs/words_per_sentence_check.csv`, `outputs/words_per_sentence_check.txt` |

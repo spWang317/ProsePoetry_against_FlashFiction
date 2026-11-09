@@ -22,6 +22,7 @@ from statsmodels.tools.tools import add_constant
 from sklearn.base import clone
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import f1_score, roc_auc_score
@@ -245,39 +246,35 @@ def run_analysis(ff_pkl=DEFAULT_FF_PKL, pp_pkl=DEFAULT_PP_PKL, out_dir=DEFAULT_O
         f.write(f"pseudo-F: {f_stat:.6f}\np-value: {p_perm:.6f}\nSS_between: {ssa:.6f}\nSS_within: {ssw:.6f}\n\n")
         f.write(f"Levene_stat: {disp_res['levene_stat']:.6f}\nLevene_p: {disp_res['levene_p']:.6f}")
 
-    print("\n[Step 4] Ablation (random forest)...")
+    print("\n[Step 4] Ablation (random forest and logistic regression)...")
     skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
-    pipe = Pipeline([("scaler", StandardScaler()), ("clf", RandomForestClassifier(n_estimators=300, random_state=42, class_weight="balanced"))])
+    classifiers = {
+        "random forest": Pipeline([("scaler", StandardScaler()), ("clf", RandomForestClassifier(n_estimators=300, random_state=42, class_weight="balanced"))]),
+        "logistic regression": Pipeline([("scaler", StandardScaler()), ("clf", LogisticRegression(max_iter=5000))]),
+    }
     X_raw, y = df[metrics_list].values, df["is_flash"].values
-    
-    ab_rows = []
-    # Baseline: Full Model
-    f1s_f, aucs_f = [], []
-    for tr, te in skf.split(X_raw, y):
-        p = clone(pipe).fit(X_raw[tr], y[tr])
-        f1s_f.append(f1_score(y[te], p.predict(X_raw[te])))
-        aucs_f.append(roc_auc_score(y[te], p.predict_proba(X_raw[te])[:, 1]))
-    
-    full_f1, full_auc = np.mean(f1s_f), np.mean(aucs_f)
-    ab_rows.append({"Dropped": "None (Full)", "F1_mean": full_f1, "F1_std": np.std(f1s_f), 
-                    "AUROC_mean": full_auc, "AUROC_std": np.std(aucs_f)})
 
-    # Leave-One-Out Ablation
-    for i, met in enumerate(metrics_list):
-        X_sub = np.delete(X_raw, i, axis=1)
-        f1s_s, aucs_s = [], []
-        for tr, te in skf.split(X_sub, y):
-            p = clone(pipe).fit(X_sub[tr], y[tr])
-            f1s_s.append(f1_score(y[te], p.predict(X_sub[te])))
-            aucs_s.append(roc_auc_score(y[te], p.predict_proba(X_sub[te])[:, 1]))
-        
-        m_f1, m_auc = np.mean(f1s_s), np.mean(aucs_s)
-        ab_rows.append({
-            "Dropped": met, "F1_mean": m_f1, "F1_std": np.std(f1s_s), 
-            "AUROC_mean": m_auc, "AUROC_std": np.std(aucs_s),
-            "Drop_F1": full_f1 - m_f1, "Drop_AUROC": full_auc - m_auc
-        })
-    
+    def cv_scores(pipe, X):
+        f1s, aucs = [], []
+        for tr, te in skf.split(X, y):
+            p = clone(pipe).fit(X[tr], y[tr])
+            f1s.append(f1_score(y[te], p.predict(X[te])))
+            aucs.append(roc_auc_score(y[te], p.predict_proba(X[te])[:, 1]))
+        return f1s, aucs
+
+    ab_rows = []
+    for clf_name, pipe in classifiers.items():
+        f1s_f, aucs_f = cv_scores(pipe, X_raw)                                   # all five measures
+        full_f1, full_auc = np.mean(f1s_f), np.mean(aucs_f)
+        ab_rows.append({"Classifier": clf_name, "Dropped": "None (Full)", "F1_mean": full_f1, "F1_std": np.std(f1s_f),
+                        "AUROC_mean": full_auc, "AUROC_std": np.std(aucs_f)})
+        for i, met in enumerate(metrics_list):                                   # one measure left out
+            f1s_s, aucs_s = cv_scores(pipe, np.delete(X_raw, i, axis=1))
+            m_f1, m_auc = np.mean(f1s_s), np.mean(aucs_s)
+            ab_rows.append({"Classifier": clf_name, "Dropped": met, "F1_mean": m_f1, "F1_std": np.std(f1s_s),
+                            "AUROC_mean": m_auc, "AUROC_std": np.std(aucs_s),
+                            "Drop_F1": full_f1 - m_f1, "Drop_AUROC": full_auc - m_auc})
+
     pd.DataFrame(ab_rows).to_csv(os.path.join(out_dir, "Ablation_Study_Results_5D.csv"), index=False)
     print(f"\nAll analysis stages complete. Results saved in {out_dir}")
 
