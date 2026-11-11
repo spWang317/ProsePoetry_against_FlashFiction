@@ -9,8 +9,8 @@
  "seed": 42,
  "bootstrap_resamples": 10000,
  "scripts_md5": {
-  "code/03_tables.py": "2aee0702f474823234943110bd515e4e",
-  "code/measures_and_statistics.py": "e0b6e477790b07df7b7ae200cde32cce"
+  "code/03_tables.py": "999ccd013e9ec5261cddc8585bdce573",
+  "code/measures_and_statistics.py": "2b1a979a09f2296492840aa7ba1abd5d"
  },
  "inputs_md5": {
   "data/embeddings/FlashFiction_embs_bge-m3.pkl": "7aebe2fe93713082139cc22061d213ec",

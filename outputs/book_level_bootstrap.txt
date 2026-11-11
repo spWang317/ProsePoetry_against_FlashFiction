@@ -1,0 +1,17 @@
+books in the analysis sample: flash fiction 48, prose poetry 197
+model                    measure     delta   CI low  CI high
+ko-sroberta-multitask    δ          +0.183   +0.093   +0.281
+ko-sroberta-multitask    σ_S        +0.123   +0.030   +0.228
+ko-sroberta-multitask    R          -0.188   -0.322   -0.063
+ko-sroberta-multitask    κ          +0.127   +0.031   +0.228
+ko-sroberta-multitask    Ω          -0.066   -0.178   +0.026
+bge-m3                   δ          +0.182   +0.086   +0.281
+bge-m3                   σ_S        +0.072   -0.043   +0.202
+bge-m3                   R          -0.185   -0.315   -0.058
+bge-m3                   κ          +0.184   +0.088   +0.287
+bge-m3                   Ω          -0.051   -0.164   +0.051
+multilingual-e5-large    δ          +0.147   +0.044   +0.260
+multilingual-e5-large    σ_S        +0.101   -0.019   +0.233
+multilingual-e5-large    R          -0.125   -0.289   +0.030
+multilingual-e5-large    κ          +0.152   +0.052   +0.263
+multilingual-e5-large    Ω          -0.149   -0.257   -0.055

@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from scipy.spatial.distance import pdist, squareform
-from scipy.stats import mannwhitneyu, levene
+from scipy.stats import mannwhitneyu, f_oneway
 from scipy.signal import periodogram
 import statsmodels.formula.api as smf
 from statsmodels.stats.multitest import multipletests
@@ -69,27 +69,30 @@ def _permanova_custom(distance_matrix, groups, n_perm=4999, seed=42):
         if perm_f >= f_obs: ge += 1
     return f_obs, (ge + 1) / (n_perm + 1), ss_a_obs, ss_w_obs
 
-def dispersion_check_full(X, groups, out_csv=None):
-    """Multivariate homogeneity of groups (Betadisper diagnostic)"""
+def dispersion_check_full(X, groups, out_csv=None, n_perm=4999, seed=42):
+    """Homogeneity of multivariate dispersion (PERMDISP): the distances of the texts to the centre of their own
+    group are compared between groups with the one-way ANOVA F statistic; p from permutations of the distances."""
     groups, uniq = np.asarray(groups), np.unique(groups)
     centroids = {g: X[groups == g].mean(axis=0) for g in uniq}
     dists = np.array([np.linalg.norm(X[i] - centroids[groups[i]]) for i in range(len(groups))])
-    
+
     rows = []
-    dg_list = []
     for g in uniq:
         dg = dists[groups == g]
-        dg_list.append(dg)
-        rows.append({"genre": g, "n": len(dg), "mean_dist": np.mean(dg), 
+        rows.append({"genre": g, "n": len(dg), "mean_dist": np.mean(dg),
                      "median_dist": np.median(dg), "std_dist": np.std(dg)})
-    
-    lev_stat, lev_p = levene(*dg_list, center="median")
+
+    f_stat = lambda lab: f_oneway(*[dists[lab == g] for g in uniq]).statistic
+    f_obs = f_stat(groups)
+    rng = np.random.default_rng(seed)
+    ge = sum(f_stat(rng.permutation(groups)) >= f_obs for _ in range(n_perm))
+    p = (ge + 1) / (n_perm + 1)
     out_df = pd.DataFrame(rows)
-    out_df["levene_stat"] = lev_stat
-    out_df["levene_p"] = lev_p
-    
+    out_df["dispersion_F"] = f_obs
+    out_df["dispersion_p"] = p
+
     if out_csv: out_df.to_csv(out_csv, index=False)
-    return {"levene_stat": lev_stat, "levene_p": lev_p}, out_df
+    return {"dispersion_F": f_obs, "dispersion_p": p}, out_df
 
 # =========================================================
 # 2. The five measures
@@ -244,7 +247,7 @@ def run_analysis(ff_pkl=DEFAULT_FF_PKL, pp_pkl=DEFAULT_PP_PKL, out_dir=DEFAULT_O
     
     with open(os.path.join(out_dir, "PERMANOVA_Result_5D.txt"), "w") as f:
         f.write(f"pseudo-F: {f_stat:.6f}\np-value: {p_perm:.6f}\nSS_between: {ssa:.6f}\nSS_within: {ssw:.6f}\n\n")
-        f.write(f"Levene_stat: {disp_res['levene_stat']:.6f}\nLevene_p: {disp_res['levene_p']:.6f}")
+        f.write(f"Dispersion_F: {disp_res['dispersion_F']:.6f}\nDispersion_p: {disp_res['dispersion_p']:.6f}")
 
     print("\n[Step 4] Ablation (random forest and logistic regression)...")
     skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)

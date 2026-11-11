@@ -32,10 +32,10 @@ multilingual-e5-large        curvature     2.0715     2.0654        0.1525 82771
 multilingual-e5-large    spec_centroid     0.2276     0.2395       -0.1494 61088.0 0.0004   -0.0093     -0.0158      -0.0029 0.0044     0.0008       -0.2312        -0.0687               0.4253
 
 == permanova
-              encoder  pseudo_F      p  SS_between  SS_within     R2  Levene_stat  Levene_p
-ko-sroberta-multitask   12.7189 0.0002     62.7075  3727.2925 0.0165       0.0458    0.8306
-               bge-m3   12.0155 0.0002     59.2940  3730.7060 0.0156       0.2519    0.6159
-multilingual-e5-large    9.7852 0.0002     48.4285  3741.5715 0.0128       0.2049    0.6509
+              encoder  pseudo_F      p  SS_between  SS_within     R2  Dispersion_F  Dispersion_p
+ko-sroberta-multitask   12.7189 0.0002     62.7075  3727.2925 0.0165        4.2925        0.0406
+               bge-m3   12.0155 0.0002     59.2940  3730.7060 0.0156        7.5077        0.0072
+multilingual-e5-large    9.7852 0.0002     48.4285  3741.5715 0.0128        2.0941        0.1462
 
 == metric_relations
               encoder  rho_delta_resonance  max_abs_rho                 max_pair

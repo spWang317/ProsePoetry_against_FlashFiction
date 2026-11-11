@@ -3,5 +3,5 @@ p-value: 0.000200
 SS_between: 59.293952
 SS_within: 3730.706048
 
-Levene_stat: 0.251936
-Levene_p: 0.615862
+Dispersion_F: 7.507659
+Dispersion_p: 0.007200

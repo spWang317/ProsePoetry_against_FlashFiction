@@ -137,7 +137,7 @@ def permanova(df, encoder):
     f, p, ssa, ssw = _permanova_custom(squareform(pdist(X)), df.genre.values, n_perm=4999, seed=SEED)
     disp, _ = dispersion_check_full(X, df.genre.values)
     return {"encoder": encoder, "pseudo_F": f, "p": p, "SS_between": ssa, "SS_within": ssw,
-            "R2": ssa / (ssa + ssw), "Levene_stat": disp["levene_stat"], "Levene_p": disp["levene_p"]}
+            "R2": ssa / (ssa + ssw), "Dispersion_F": disp["dispersion_F"], "Dispersion_p": disp["dispersion_p"]}
 
 
 def classification(df, encoder):
